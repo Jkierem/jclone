@@ -5,7 +5,7 @@ const Ok = (val) => {
         },
         get(){ return val; },
         map(f){ return Ok(f(val)) },
-        open(f){ return f(val) },
+        chain(f){ return f(val) },
         onError(f){ return val },
         isOk(){ return true },
         isErr(){ return false },
@@ -19,7 +19,7 @@ const Err = (err) => {
         },
         get(){ return err; },
         map(f){ return this },
-        open(f){ return f(err) },
+        chain(f){ return f(err) },
         onError(f){ return f(err) },
         isOk(){ return false },
         isErr(){ return true },
@@ -31,6 +31,7 @@ const Result = {
     Ok,Err,
     fromFalsy: val => val ? Ok(val) : Err(val),
     fromError: val => val instanceof Error ? Err(val) : Ok(val),
+    fromTry: t => t.match({ Success: Ok , Failure: Err }),
     try: f => {
         try {
             return Ok(f())

@@ -1,6 +1,7 @@
 const https = require("https");
 const Result = require("../structs/result");
 const Maybe = require("../structs/maybe");
+const Try = require("../structs/try");
 
 const url = "https://api.github.com";
 const userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36'
@@ -10,7 +11,7 @@ const UnexpectedError = e => Result.Err({
     error: e
 })
 
-const ParseError = x => Result.Err({
+const ParseError = e => Result.Err({
     type: "Parse Error",
     error: e,
 })
@@ -26,10 +27,10 @@ const StatusCodeNot200 = x => Result.Err({
 })
 
 const github = {
-    repos(username,page=1){
+    repos(username,page=1,perPage=30){
         return new Promise(
-            (resolve,reject) => {
-                https.get(`${url}/users/${username}/repos?per_page=30&page=${page}`,{
+            (resolve) => {
+                https.get(`${url}/users/${username}/repos?per_page=${perPage}&page=${page}`,{
                     headers: {
                         'User-Agent' : userAgent
                     }
@@ -51,7 +52,7 @@ const github = {
                     const pushToBody = x => body.push(x);
                     res.on("data", pushToBody)
                     res.on("end", () => {
-                        try {
+                        Try.from(() => {
                             const parsedBody = JSON.parse(Buffer.concat(body).toString());
                             maybeError.match({
                                 Just: (e) => {
@@ -67,9 +68,7 @@ const github = {
                                     resolve(Result.Ok(parsedBody))
                                 }
                             })
-                        } catch(e) {
-                            resolve(ParseError(e))
-                        }
+                        }).catch(e => resolve(ParseError(e)))
                     })
                 }).on("error", e => resolve(UnexpectedError(e)))
             }

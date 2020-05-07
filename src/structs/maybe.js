@@ -2,7 +2,7 @@ const Just = x => ({
     match(cases){ return cases["Just"](x) },
     get(){ return x },
     map(f){ return Just(f(x)) },
-    open(f){ return f(x) },
+    chain(f){ return f(x) },
     onNone(f){ return this },
     isJust(){ return true },
     isNone(){ return false }
@@ -12,7 +12,7 @@ const _None = {
     match(cases){ return cases["None"]() },
     get(){ return undefined },
     map(f){ return this },
-    open(f){ return f() },
+    chain(f){ return f() },
     onNone(f){ return f() },
     isJust(){ return false },
     isNone(){ return true }
