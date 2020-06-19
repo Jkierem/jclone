@@ -24,6 +24,7 @@ const Maybe = {
     fromFalsy: x => x ? Just(x) : _None,
     fromArray: x => x.length === 0 ? _None : Just(x),
     fromNullish: x => x === null || x === undefined ? _None : Just(x),
+    fromArrayOfFalsy: arr => arr.every(m => Maybe.fromFalsy(m).match({ Just: () => true, None: () => false })) ? Just(arr) : _None,
 }
 
 module.exports = Maybe
